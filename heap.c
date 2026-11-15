@@ -15,6 +15,9 @@ void insert(Heap *p, const Msg x)
 {
         int k;
 
+        if (p->h_len >= 100000)
+                return;
+
         k = p->h_len;
         p->h_arr[k] = x;
         p->h_len++;
@@ -67,7 +70,14 @@ static void sink(Heap *p, int k)
 }
 Msg delMin(Heap *p)
 {
-        Msg result = p->h_arr[0];
+        Msg result;
+
+        if (p->h_len <= 0) {
+                memset(&result, 0, sizeof(Msg));
+                return result;
+        }
+
+        result = p->h_arr[0];
 
         p->h_len--;
         if (p->h_len > 0) {
