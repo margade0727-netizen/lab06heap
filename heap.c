@@ -3,50 +3,77 @@
 static void swim(Heap *p, int);
 static void sink(Heap *p, int);
 
-/*
-  Хоёр зурвасын чухлыг харьцуулах функц.
-  b нь илүү чухал бол 1, бусад үед 0-ыг буцаах функц.
-  Өөрөөр хэлбэл a < b үйлдэл юм.
-*/
 int less(const Msg *a, const Msg *b)
 {
-        // Энд жиших үйлдийг хийнэ
+        if (a->priority != b->priority)
+                return a->priority < b->priority;
+
+        return a->time < b->time;
 }
 
-/*
-  Оруулах функц. heap зарчмаар чухлын дарааллыг баримтлан оруулна.
-  Ингэхдээ хамгийн чухал зурвас heap-ын оройд хадгалагдана.
-  x зурвасыг p-ын зааж буй heap бүтцэд оруулна.
- */
 void insert(Heap *p, const Msg x)
 {
-        // Энд оруулах үйлдлийг хийнэ
+        int k;
+
+        k = p->h_len;
+        p->h_arr[k] = x;
+        p->h_len++;
+        swim(p, k);
 }
 
-/*
-  Heap бүтцийн swim үйлдэл.
-  k нь swim үйлдлийг p-ын зааж буй heap дээр эхлүүлэх индекс.
- */
 static void swim(Heap *p, int k)
 {
-        // Энд swim үйлдлийг хийнэ
+        int parent;
+
+        while (k > 0) {
+                parent = (k - 1) / 2;
+
+                if (!less(&p->h_arr[k], &p->h_arr[parent]))
+                        break;
+
+                Msg tmp = p->h_arr[k];
+                p->h_arr[k] = p->h_arr[parent];
+                p->h_arr[parent] = tmp;
+
+                k = parent;
+        }
 }
 
-/*
-  Heap бүтцийн sink үйлдэл.
-  k нь sink үйлдлийг p-ын зааж буй heap дээр эхлүүлэх индекс.
- */
 static void sink(Heap *p, int k)
 {
-        // Энд sink үйлдлийг хийнэ
-}
+        int left, right, child;
 
-/*
-  p-ын зааж буй heap бүтцээс оройн элементийг гаргаад буцаах функц.
-  Гаргасны дараа орой бүрийн хувьд heap зарчим хадгалах ёстой.
- */
+        while (1) {
+                left = 2 * k + 1;
+                right = left + 1;
+
+                if (left >= p->h_len)
+                        break;
+
+                child = left;
+                if (right < p->h_len &&
+                    less(&p->h_arr[right], &p->h_arr[left]))
+                        child = right;
+
+                if (!less(&p->h_arr[child], &p->h_arr[k]))
+                        break;
+
+                Msg tmp = p->h_arr[k];
+                p->h_arr[k] = p->h_arr[child];
+                p->h_arr[child] = tmp;
+
+                k = child;
+        }
+}
 Msg delMin(Heap *p)
 {
-        // Энд хамгийн багыг гаргах үйлдлийг хийнэ
-}
+        Msg result = p->h_arr[0];
 
+        p->h_len--;
+        if (p->h_len > 0) {
+                p->h_arr[0] = p->h_arr[p->h_len];
+                sink(p, 0);
+        }
+
+        return result;
+}
